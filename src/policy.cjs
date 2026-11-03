@@ -18,7 +18,7 @@ function permissionAllowed(permission, requestingUrl, topUrl, embeddingOrigin) {
   if (['storage-access', 'top-level-storage-access'].includes(permission)) {
     return trusted(topUrl) && (!embeddingOrigin || trusted(embeddingOrigin));
   }
-  return ['notifications', 'media', 'fullscreen', 'persistent-storage'].includes(permission);
+  return ['notification', 'notifications', 'media', 'fullscreen', 'persistent-storage'].includes(permission);
 }
 function browserUserAgent(chromeVersion, platform) {
   const os = platform === 'win32' ? 'Windows NT 10.0; Win64; x64' : platform === 'darwin' ? 'Macintosh; Intel Mac OS X 10_15_7' : 'X11; Linux x86_64';

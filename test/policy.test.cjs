@@ -39,3 +39,9 @@ test('QR session push uses the exact observed chat bridge path',()=>{
  assert.equal(trusted('https://jr.chat.zalo.me/other'),false);
  assert.equal(trusted('https://jr.chat.zalo.me.evil.test/jr/pushsession'),false);
 });
+
+test('Electron notification permission is allowed only for trusted Zalo pages', () => {
+  const {permissionAllowed}=require('../src/policy.cjs');
+  assert.equal(permissionAllowed('notification','https://chat.zalo.me/','https://chat.zalo.me/'),true);
+  assert.equal(permissionAllowed('notification','https://example.com/','https://chat.zalo.me/'),false);
+});

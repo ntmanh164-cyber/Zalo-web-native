@@ -35,6 +35,8 @@ html.zn-windows #chatViewContainer > #header { padding-right: 144px !important; 
 .zn-composer .chat-box-toolbar-item { margin: 0 !important; }
 .zn-composer #chatInput { position: relative !important; border: 1px solid var(--zn-line) !important; border-radius: 14px !important; box-shadow: 0 2px 10px #29476108; }
 .zn-composer #chat-input-container-id { padding-left: 40px !important; }
+.zn-chat-top { flex-shrink: 0; width: 32px; height: 32px; margin: 0 6px; border: 0; border-radius: 8px; color: var(--zn-blue); background: var(--zn-field); cursor: pointer; font-size: 20px; }
+.zn-chat-top:focus-visible { outline: 2px solid var(--zn-blue); }
 .zn-attachments { position: absolute; left: 7px; bottom: 9px; display: grid; place-items: center; width: 32px; height: 32px; background: transparent; color: #8198ae; border: 0; border-radius: 8px; cursor: pointer; z-index: 2; }
 .zn-attachments:hover, .zn-attachments[aria-expanded=true] { color: var(--zn-blue); background: var(--zn-field); }
 .zn-attachments:focus-visible { outline: 2px solid var(--zn-blue); }
@@ -58,6 +60,17 @@ function installFilter() {
   const promoText = /hãy tải ứng dụng zalo pc|tải zalo pc để|tải ứng dụng zalo pc để|nạp tiền zstyle|trải nghiệm tốt hơn.*zalo pc|zalo pc.*trải nghiệm tốt hơn/i;
   let timer, scrolling;
   function scan() {
+    const header=document.querySelector('#headerBtns');
+    if(header && !header.querySelector('.zn-chat-top')) {
+      const top=document.createElement('button');top.type='button';top.className='zn-chat-top';
+      top.textContent='↑';top.title='Lên đầu tin nhắn đã tải';top.setAttribute('aria-label','Cuộn lên đầu cuộc trò chuyện');
+      top.addEventListener('click',()=>{
+        const candidates=[document.querySelector('#messageViewContainer'),document.querySelector('#messageViewScroll'),...document.querySelectorAll('#messageView *')].filter(Boolean);
+        const scroller=candidates.find(el=>el.scrollHeight>el.clientHeight+1 && /auto|scroll/.test(getComputedStyle(el).overflowY));
+        if(scroller)scroller.scrollTo({top:getComputedStyle(scroller).flexDirection==='column-reverse'?-scroller.scrollHeight:0,behavior:'smooth'});
+      });
+      header.prepend(top);
+    }
     const container = document.getElementById('chat-box-input-container-id');
     const input = container?.querySelector('#chatInput');
     if (input && container.querySelector('.chat-box-toolbar') && !input.querySelector('.zn-attachments')) {

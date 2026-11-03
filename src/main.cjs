@@ -1,4 +1,4 @@
-const { app, BrowserWindow, WebContentsView, ipcMain, Menu, shell, dialog, desktopCapturer, screen, clipboard, systemPreferences } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, Menu, shell, dialog, desktopCapturer, screen, clipboard, systemPreferences, Notification } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { trusted, external, cropRect, permissionAllowed, browserUserAgent } = require('./policy.cjs');
@@ -94,7 +94,7 @@ function createWindow() {
     trafficLightPosition:{x:13,y:17}, ...(process.platform !== 'darwin' ? {titleBarOverlay:{color:'#f6f8fc',symbolColor:'#50627b',height:42}} : {}),
     webPreferences:secure});
   win.loadFile(local('index.html'));
-  zalo = new WebContentsView({webPreferences:{partition:'persist:zalo',contextIsolation:true,nodeIntegration:false,sandbox:true,spellcheck:true}});
+  zalo = new WebContentsView({webPreferences:{partition:'persist:zalo',preload:path.join(__dirname,'remote-preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,spellcheck:true}});
   win.contentView.addChildView(zalo);
   headerView=new WebContentsView({webPreferences:secure});
   footerView=new WebContentsView({webPreferences:secure});
@@ -150,11 +150,15 @@ function createWindow() {
   const menu = [
     ...(process.platform === 'darwin' ? [{label:app.name,submenu:[{role:'about'},{type:'separator'},{role:'hide'},{role:'hideOthers'},{role:'unhide'},{type:'separator'},{role:'quit'}]}] : []),
     {label:'Chỉnh sửa',submenu:[{role:'undo'},{role:'redo'},{type:'separator'},{role:'cut'},{role:'copy'},{role:'paste'},{role:'selectAll'}]},
-    {label:'Zalo',submenu:[{label:`Chụp màn hình (${shortcut})`,accelerator:'CommandOrControl+Shift+5',click:capture},{label:'Tải lại',accelerator:'CommandOrControl+R',click:()=>wc.reload()},{role:'togglefullscreen'},{type:'separator'},{label:'Phóng to',accelerator:'CommandOrControl+Plus',click:()=>wc.setZoomLevel(Math.min(3,wc.getZoomLevel()+0.5))},{label:'Thu nhỏ',accelerator:'CommandOrControl+-',click:()=>wc.setZoomLevel(Math.max(-2,wc.getZoomLevel()-0.5))},{label:'Cỡ mặc định',accelerator:'CommandOrControl+0',click:()=>wc.setZoomLevel(0)}]},
+    {label:'Zalo',submenu:[{label:`Chụp màn hình (${shortcut})`,accelerator:'CommandOrControl+Shift+5',click:capture},{label:'Thử thông báo',click:()=>{if(Notification.isSupported()){const notification=new Notification({title:'Zalo Native',body:'Thông báo tin nhắn đã sẵn sàng.',icon:appIcon});notification.on('click',()=>{win.show();win.focus();});notification.show();}}},{label:'Tải lại',accelerator:'CommandOrControl+R',click:()=>wc.reload()},{role:'togglefullscreen'},{type:'separator'},{label:'Phóng to',accelerator:'CommandOrControl+Plus',click:()=>wc.setZoomLevel(Math.min(3,wc.getZoomLevel()+0.5))},{label:'Thu nhỏ',accelerator:'CommandOrControl+-',click:()=>wc.setZoomLevel(Math.max(-2,wc.getZoomLevel()-0.5))},{label:'Cỡ mặc định',accelerator:'CommandOrControl+0',click:()=>wc.setZoomLevel(0)}]},
     {label:'Cửa sổ',submenu:[{role:'minimize'},{role:'close'}]}
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
+ipcMain.on('remote:open-link', (event, url) => {
+  if (event.sender !== zalo?.webContents || event.senderFrame !== zalo.webContents.mainFrame || !trusted(event.sender.getURL()) || typeof url !== 'string' || url.length > 16384) return;
+  openExternal(url);
+});
 ipcMain.handle('desktop',async (event,action,payload) => {
   // Only bundled UI may invoke native APIs; the Zalo view has no preload bridge.
   const overlay = overlays.get(event.sender.id);
@@ -209,6 +213,7 @@ ipcMain.handle('desktop',async (event,action,payload) => {
 });
 if (process.env.ZN_TEST_PROFILE) app.setPath('userData',process.env.ZN_TEST_PROFILE);
 app.setName('Zalo Native');
+if(process.platform === 'win32') app.setAppUserModelId('me.zalonative.desktop');
 if (!app.requestSingleInstanceLock()) app.quit();
 else {
   app.on('second-instance',() => { if (win) {win.show();win.focus();} });

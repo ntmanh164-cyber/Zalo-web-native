@@ -65,3 +65,11 @@ Zalo thay đổi DOM độc lập với ứng dụng. Banner có selector mới 
 Tài liệu API: https://www.electronjs.org/docs/latest/api/desktop-capturer/
 
 Phiên bản 0.2.0 đã được kiểm tra giao diện trên macOS với tài khoản đăng nhập thật: Tin nhắn, Danh bạ, My Documents, Cài đặt, các bong bóng và ô soạn tin. Các tab phân loại Ưu tiên/Khác vẫn dùng đúng chức năng phân loại Zalo hiện có. Không gửi tin nhắn hoặc tải tệp lên trong quá trình kiểm thử.
+
+### Cập nhật 0.2.2
+
+- Sửa tên quyền thông báo Electron để Zalo có thể hiển thị popup. Nếu chưa thấy, kiểm tra Cài đặt hệ thống → Thông báo → Zalo Native; dùng menu Zalo → Thử thông báo để kiểm tra.
+- Bấm liên kết trong tin nhắn để mở trình duyệt mặc định, kể cả khi trang Zalo giữ sự kiện click.
+- Thêm nút ↑ trên khung chat để cuộn lên đầu phần lịch sử đã tải. Lịch sử cũ hơn vẫn do Zalo tải theo từng đợt.
+
+Các liên kết bộ cài phía trên hiện là bản phát hành 0.2.1.
