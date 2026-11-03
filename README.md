@@ -2,6 +2,19 @@
 
 Ứng dụng desktop chạy Zalo Web, với thanh công cụ gọn lấy cảm hứng từ Telegram. Đây là ứng dụng độc lập, không phải sản phẩm chính thức của Zalo. Phần chat được phục vụ bởi Zalo Web; Electron cung cấp cửa sổ và tích hợp hệ điều hành, không phải bản viết lại Zalo bằng Swift/WinUI.
 
+## Tải và cài đặt
+
+Phiên bản **0.2.1** có bộ cài sẵn, không cần Node.js/npm:
+
+| Nền tảng | Bộ cài |
+| --- | --- |
+| macOS 13+, Apple Silicon (chip dòng M) | [Tải DMG](https://github.com/ntmanh164-cyber/Zalo-web-native/releases/download/v0.2.1/Zalo-Native-0.2.1-macOS-arm64.dmg) |
+| Windows x64 | [Tải EXE](https://github.com/ntmanh164-cyber/Zalo-web-native/releases/download/v0.2.1/Zalo-Native-Setup-0.2.1-Windows-x64.exe) |
+
+**Mac:** mở DMG → kéo Zalo Native vào Applications → mở ứng dụng. **Windows:** mở EXE → làm theo bộ cài. Sau đó quét QR và xác nhận trên điện thoại.
+
+Xem [hướng dẫn cài đặt, cấp quyền chụp màn hình và kiểm tra SHA-256](INSTALL.md) hoặc [toàn bộ tệp release](https://github.com/ntmanh164-cyber/Zalo-web-native/releases/tag/v0.2.1). Các bộ cài hiện chưa ký số; bản Mac chưa notarize. Bản macOS đã được kiểm thử trên Apple Silicon; Windows chưa kiểm thử trên thiết bị thật.
+
 ## Chạy
 
 Yêu cầu Node.js 24 và npm.
