@@ -35,8 +35,11 @@ html.zn-windows #chatViewContainer > #header { padding-right: 144px !important; 
 .zn-composer .chat-box-toolbar-item { margin: 0 !important; }
 .zn-composer #chatInput { position: relative !important; border: 1px solid var(--zn-line) !important; border-radius: 14px !important; box-shadow: 0 2px 10px #29476108; }
 .zn-composer #chat-input-container-id { padding-left: 40px !important; }
-.zn-chat-top { flex-shrink: 0; width: 32px; height: 32px; margin: 0 6px; border: 0; border-radius: 8px; color: var(--zn-blue); background: var(--zn-field); cursor: pointer; font-size: 20px; }
-.zn-chat-top:focus-visible { outline: 2px solid var(--zn-blue); }
+.zn-list-top { position: absolute; right: 16px; bottom: 80px; z-index: 20; width: 40px; height: 40px; padding: 0; display: grid; place-items: center; border: 1px solid var(--zn-line); border-radius: 50%; color: var(--zn-ink); background: var(--zn-panel); box-shadow: 0 3px 16px #29476120; cursor: pointer; }
+.zn-list-top[hidden] { display: none !important; }
+.zn-list-top:hover { color: var(--zn-blue); background: var(--zn-field); }
+.zn-list-top:focus-visible { outline: 2px solid var(--zn-blue); }
+.zn-list-top svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .zn-attachments { position: absolute; left: 7px; bottom: 9px; display: grid; place-items: center; width: 32px; height: 32px; background: transparent; color: #8198ae; border: 0; border-radius: 8px; cursor: pointer; z-index: 2; }
 .zn-attachments:hover, .zn-attachments[aria-expanded=true] { color: var(--zn-blue); background: var(--zn-field); }
 .zn-attachments:focus-visible { outline: 2px solid var(--zn-blue); }
@@ -59,18 +62,32 @@ function installFilter() {
   const selectors = '[class*="banner" i], [id*="banner" i], [class*="promotion" i], [data-testid*="upsell" i]';
   const promoText = /hãy tải ứng dụng zalo pc|tải zalo pc để|tải ứng dụng zalo pc để|nạp tiền zstyle|trải nghiệm tốt hơn.*zalo pc|zalo pc.*trải nghiệm tốt hơn/i;
   let timer, scrolling;
-  function scan() {
-    const header=document.querySelector('#headerBtns');
-    if(header && !header.querySelector('.zn-chat-top')) {
-      const top=document.createElement('button');top.type='button';top.className='zn-chat-top';
-      top.textContent='↑';top.title='Lên đầu tin nhắn đã tải';top.setAttribute('aria-label','Cuộn lên đầu cuộc trò chuyện');
-      top.addEventListener('click',()=>{
-        const candidates=[document.querySelector('#messageViewContainer'),document.querySelector('#messageViewScroll'),...document.querySelectorAll('#messageView *')].filter(Boolean);
-        const scroller=candidates.find(el=>el.scrollHeight>el.clientHeight+1 && /auto|scroll/.test(getComputedStyle(el).overflowY));
-        if(scroller)scroller.scrollTo({top:getComputedStyle(scroller).flexDirection==='column-reverse'?-scroller.scrollHeight:0,behavior:'smooth'});
-      });
-      header.prepend(top);
+  function listScroller() {
+    const sidebar=document.querySelector('#sidebarNav');
+    const list=sidebar?.querySelector('#conversationList');
+    if(!list || !list.getClientRects().length)return null;
+    // Zalo may put the scroll owner on the virtual list or a wrapper above it.
+    for(let el=list;el && el!==sidebar;el=el.parentElement) {
+      if(el.scrollHeight>el.clientHeight+1 && /auto|scroll|overlay/.test(getComputedStyle(el).overflowY))return el;
     }
+    return null;
+  }
+  function updateListTop() {
+    const top=document.querySelector('#sidebarNav .zn-list-top');if(!top)return;
+    const scroller=listScroller();top.hidden=!scroller || scroller.scrollTop<=80;
+  }
+  function scan() {
+    // The control belongs to the chat list, never the message history.
+    document.querySelectorAll('.zn-chat-top').forEach(el=>el.remove());
+    const sidebar=document.querySelector('#sidebarNav');
+    if(sidebar && !sidebar.querySelector('.zn-list-top')) {
+      const top=document.createElement('button');top.type='button';top.className='zn-list-top';top.hidden=true;
+      top.title='Về đầu danh sách chat';top.setAttribute('aria-label','Về đầu danh sách chat');
+      top.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 15 7-7 7 7"/></svg>';
+      top.addEventListener('click',()=>{const scroller=listScroller();if(scroller)scroller.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});
+      sidebar.append(top);
+    }
+    updateListTop();
     const container = document.getElementById('chat-box-input-container-id');
     const input = container?.querySelector('#chatInput');
     if (input && container.querySelector('.chat-box-toolbar') && !input.querySelector('.zn-attachments')) {
@@ -102,7 +119,9 @@ function installFilter() {
   const observer = new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(scan, 120); });
   observer.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'){document.querySelectorAll('.zn-tools-open').forEach(el=>{el.classList.remove('zn-tools-open');el.querySelector('.zn-attachments')?.setAttribute('aria-expanded','false');});}});
+  window.addEventListener('resize',updateListTop);
   document.addEventListener('scroll', () => {
+    updateListTop();
     document.documentElement.classList.add('zn-scrolling'); clearTimeout(scrolling);
     scrolling = setTimeout(() => document.documentElement.classList.remove('zn-scrolling'), 900);
   }, {capture:true, passive:true});
