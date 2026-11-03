@@ -73,3 +73,7 @@ Phiên bản 0.2.0 đã được kiểm tra giao diện trên macOS với tài k
 - Nút nổi ↑ ở góc dưới danh sách chat chỉ xuất hiện khi cuộn danh sách xuống; bấm để về đầu danh sách, không làm thay đổi vị trí đọc tin nhắn.
 
 Các liên kết bộ cài phía trên hiện là bản phát hành 0.2.1.
+
+### Cập nhật 0.2.4
+
+Sửa cảnh báo không mở được popup khi Zalo gọi `window.open()` hoặc mở cửa sổ trống rồi gán liên kết sau đó. Liên kết vẫn được chuyển sang trình duyệt mặc định. Kiểm thử riêng luồng này bằng `npm run test:popups`.

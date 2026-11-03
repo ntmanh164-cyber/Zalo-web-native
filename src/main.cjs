@@ -2,6 +2,7 @@ const { app, BrowserWindow, WebContentsView, ipcMain, Menu, shell, dialog, deskt
 const path = require('node:path');
 const fs = require('node:fs');
 const { trusted, external, cropRect, permissionAllowed, browserUserAgent } = require('./policy.cjs');
+const { installPopups } = require('./popups.cjs');
 const { navigationScript } = require('./navigation.cjs');
 const { attachDiagnostics } = require('./diagnostics.cjs');
 const { style, filterScript } = require('./zalo-style.cjs');
@@ -104,7 +105,7 @@ function createWindow() {
   const wc = zalo.webContents;
   const diagnostic = attachDiagnostics(wc, app);
   wc.setUserAgent(browserUserAgent(process.versions.chrome, process.platform));
-  wc.setWindowOpenHandler(({url}) => { if (trusted(url)) wc.loadURL(url); else openExternal(url); return {action:'deny'}; });
+  installPopups(wc,{openExternal,navigateTrusted:url=>wc.loadURL(url).catch(()=>{})});
   wc.on('will-navigate',(event,url) => { if (!trusted(url)) { event.preventDefault(); openExternal(url); } });
   wc.on('will-redirect',(event,url) => { if (!trusted(url)) event.preventDefault(); });
   wc.session.setPermissionRequestHandler((contents, permission, callback, details) => {
