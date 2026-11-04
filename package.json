@@ -1,6 +1,6 @@
 {
   "name": "zalo-native",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "private": true,
   "description": "A compact desktop home for Zalo Web",
   "author": "Zalo Native",
@@ -12,7 +12,8 @@
     "pack": "electron-builder --dir",
     "dist:mac": "electron-builder --mac",
     "dist:win": "electron-builder --win",
-    "test:popups": "node test/popups-smoke.cjs"
+    "test:popups": "node test/popups-smoke.cjs",
+    "test:clipboard": "node test/clipboard-smoke.cjs"
   },
   "devDependencies": {
     "electron": "45.2.1",

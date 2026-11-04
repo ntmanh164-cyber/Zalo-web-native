@@ -1,8 +1,9 @@
-const { app, BrowserWindow, WebContentsView, ipcMain, Menu, shell, dialog, desktopCapturer, screen, clipboard, systemPreferences, Notification } = require('electron');
+const { app, BrowserWindow, WebContentsView, ipcMain, Menu, shell, dialog, desktopCapturer, screen, systemPreferences, Notification } = require('electron');
 const path = require('node:path');
 const fs = require('node:fs');
 const { trusted, external, cropRect, permissionAllowed, browserUserAgent } = require('./policy.cjs');
-const { pasteImageScript } = require('./attachments.cjs');
+const { focusEditorScript } = require('./attachments.cjs');
+const { writeClipboardImage } = require('./image-clipboard.cjs');
 const { installPopups } = require('./popups.cjs');
 const { navigationScript } = require('./navigation.cjs');
 const { attachDiagnostics } = require('./diagnostics.cjs');
@@ -182,7 +183,7 @@ ipcMain.handle('desktop',async (event,action,payload) => {
   if (fromPreview) {
     if (!capturedImage) return;
     if (action === 'preview:image') return capturedImage.toDataURL();
-    if (action === 'preview:copy') { clipboard.writeImage(capturedImage); return true; }
+    if (action === 'preview:copy') { await writeClipboardImage(capturedImage); return true; }
     if (action === 'preview:save') {
       const result = await dialog.showSaveDialog(preview,{defaultPath:`Zalo-${Date.now()}.png`,filters:[{name:'PNG',extensions:['png']}]});
       if (!result.canceled && result.filePath) { await fs.promises.writeFile(result.filePath,capturedImage.toPNG()); return true; } return false;
@@ -190,11 +191,10 @@ ipcMain.handle('desktop',async (event,action,payload) => {
     if (action === 'preview:paste') {
       if(!zalo || !trusted(zalo.webContents.getURL()))throw new Error('Hãy mở cuộc trò chuyện trước khi đính kèm ảnh.');
       showSettings(false);win.show();win.focus();zalo.webContents.focus();
-      const result=await zalo.webContents.executeJavaScript(pasteImageScript(capturedImage.toPNG().toString('base64'),`Zalo-Screenshot-${Date.now()}.png`),true);
-      if(!result.ok) {
-        clipboard.writeImage(capturedImage);preview.show();preview.focus();
-        throw new Error(result.reason==='editor'?'Hãy mở một cuộc trò chuyện rồi thử đính kèm lại. Ảnh vẫn còn trong cửa sổ xem trước.':'Zalo chưa nhận ảnh. Ảnh đã được sao chép; hãy thử Cmd+V (Mac) hoặc Ctrl+V (Windows), hoặc lưu PNG để đính kèm.');
-      }
+      const found=await zalo.webContents.executeJavaScript(focusEditorScript,true);
+      if(!found){preview.show();preview.focus();throw new Error('Hãy mở một cuộc trò chuyện rồi thử đính kèm lại. Ảnh vẫn còn trong cửa sổ xem trước.');}
+      await writeClipboardImage(capturedImage);
+      zalo.webContents.focus();zalo.webContents.paste();
       preview.close();return true;
     }
     throw new Error('Unknown preview action');

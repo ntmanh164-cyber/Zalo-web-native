@@ -58,7 +58,7 @@ const fs=require('node:fs/promises');const os=require('node:os');const path=requ
  const remoteImage=await app.evaluate(async({webContents})=>(await webContents.getAllWebContents().find(w=>w.getURL().startsWith('https://')).capturePage()).toPNG().toString('base64'));
  await fs.writeFile('test-results/zalo.png',Buffer.from(remoteImage,'base64'));
  const {style,filterScript}=require('../src/zalo-style.cjs');
- const {pasteImageScript}=require('../src/attachments.cjs');
+ const {focusEditorScript}=require('../src/attachments.cjs');
  const filtering=await app.evaluate(async({BrowserWindow}, {css,script,attachment})=>{
  const fixture=new BrowserWindow({show:false,width:1280,height:800,webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true}});
  await fixture.loadURL('data:text/html;charset=utf-8,'+encodeURIComponent('<div id="headerBtns"></div><div id="messageViewContainer" style="overflow-y:auto;height:100px"><div style="height:1000px"></div></div><div id="chat-box-input-container-id"><div style="height:41px"><div><ul class="chat-box-toolbar"><li><button id="original-tool">File</button></li></ul></div></div><div id="chatInput"><div id="richInput" contenteditable="true"></div></div></div><nav id="sidebarNav"><div id="main-tab"></div><div id="conversationListId" style="height:100px;overflow-y:auto"><div id="conversationList" style="height:1500px"></div></div></nav><div class="download-pc-banner">Hãy tải ứng dụng Zalo PC để có trải nghiệm tốt hơn</div><div class="chat-message"><div class="banner">Hãy tải ứng dụng Zalo PC để có trải nghiệm tốt hơn</div></div><div role="dialog">Cuộc gọi đến</div><div class="zcard-body"><section><div>Nâng cao hiệu quả công việc với Zalo PC<a href="https://zalo.me/download/zalo-pc?utm=90000">Tải ngay</a></div></section></div>'));
@@ -74,20 +74,16 @@ const fs=require('node:fs/promises');const os=require('node:os');const path=requ
    return {initial,messageScrollHidden,visible,returned,messagePosition,removedHidden:button.hidden,headerButtons:document.querySelectorAll('#headerBtns .zn-chat-top').length};
  })()`);
  result.composer=await fixture.webContents.executeJavaScript(`(() => {document.querySelector('#original-tool').click();return {display:getComputedStyle(document.querySelector('.chat-box-toolbar')).display,host:getComputedStyle(document.querySelector('.zn-tools-host')).display,clicks:window.toolClicks,editable:document.querySelector('#richInput').isContentEditable,hiddenToggle:!!document.querySelector('.zn-attachments')};})()`);
- await fixture.webContents.executeJavaScript(`window.receivedImage=null;window.sent=0;document.querySelector('#richInput').textContent='Existing draft';document.querySelector('#richInput').addEventListener('paste',event=>{event.preventDefault();const file=event.clipboardData.files[0];window.receivedImage={name:file.name,type:file.type,size:file.size,count:event.clipboardData.files.length};});document.addEventListener('keydown',()=>window.sent++);`);
- result.attachment=await fixture.webContents.executeJavaScript(attachment);
- result.image=await fixture.webContents.executeJavaScript(`({file:window.receivedImage,draft:document.querySelector('#richInput').textContent,sent:window.sent})`);
+ result.focused=await fixture.webContents.executeJavaScript(attachment);
  await fixture.webContents.executeJavaScript(`document.querySelector('#richInput').remove()`);
  result.noEditor=await fixture.webContents.executeJavaScript(attachment);
  await fixture.webContents.removeInsertedCSS(key);
  result.restored=await fixture.webContents.executeJavaScript(`getComputedStyle(document.querySelector('.download-pc-banner')).display`);
  fixture.destroy();return result;
- },{css:style({compact:true,hideBanners:true}),script:filterScript,attachment:pasteImageScript('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a6XcAAAAASUVORK5CYII=','Screenshot-test.png')});
+ },{css:style({compact:true,hideBanners:true}),script:filterScript,attachment:focusEditorScript});
  assert.deepEqual(filtering.top,{initial:true,messageScrollHidden:true,visible:true,returned:true,messagePosition:300,removedHidden:true,headerButtons:0});
  assert.deepEqual(filtering.composer,{display:'flex',host:'contents',clicks:1,editable:true,hiddenToggle:false});
- assert.deepEqual(filtering.attachment,{ok:true,reason:'accepted'});
- assert.deepEqual(filtering.noEditor,{ok:false,reason:'editor'});
- assert.equal(filtering.image.file.name,'Screenshot-test.png');assert.equal(filtering.image.file.type,'image/png');assert.ok(filtering.image.file.size>50);assert.equal(filtering.image.file.count,1);assert.equal(filtering.image.draft,'Existing draft');assert.equal(filtering.image.sent,0);
+ assert.equal(filtering.focused,true);assert.equal(filtering.noEditor,false);
  assert.equal(filtering.sidebarWidth,'316px');assert.equal(filtering.loginPromo,'none');assert.equal(filtering.promo,'none');assert.notEqual(filtering.message,'none');assert.notEqual(filtering.dialog,'none');assert.notEqual(filtering.restored,'none');
  await app.evaluate(({BrowserWindow,desktopCapturer,systemPreferences,nativeImage,screen,dialog,app})=>{
    app.captureTest={getSources:desktopCapturer.getSources,getStatus:systemPreferences.getMediaAccessStatus,showErrorBox:dialog.showErrorBox,hiddenBeforeCapture:false};
@@ -108,7 +104,7 @@ const fs=require('node:fs/promises');const os=require('node:os');const path=requ
  } finally {
    await app.evaluate(({app,desktopCapturer,systemPreferences,dialog})=>{dialog.showErrorBox=app.captureTest.showErrorBox;desktopCapturer.getSources=app.captureTest.getSources;systemPreferences.getMediaAccessStatus=app.captureTest.getStatus;app.captureTest.extra.destroy();});
  }
- console.log('PASS PNG file attachment preserves draft without sending; original toolbar remains visible; capture hides main and existing preview before reading the screen');
+ console.log('PASS editor focus and original toolbar; capture hides main and existing preview before reading the screen');
  console.log('PASS banner filtering preserves chat and call dialogs; disabling restores banners');
  } finally {if(app)await app.close();await fs.rm(profile,{recursive:true,force:true});}
 })().catch(e=>{console.error(e);process.exitCode=1;});

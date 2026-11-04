@@ -81,5 +81,9 @@ Sửa cảnh báo không mở được popup khi Zalo gọi `window.open()` ho�
 ### Cập nhật 0.2.5
 
 - Hiển thị lại hàng công cụ soạn tin gốc, giữ nguyên xử lý của Zalo Web.
-- Đính kèm ảnh chụp bằng tệp PNG có tên và loại tệp rõ ràng; giữ ảnh xem trước nếu không tìm thấy ô soạn hoặc trang không nhận ảnh.
+- Đính kèm ảnh chụp bằng PNG; giữ ảnh xem trước nếu không tìm thấy ô soạn hoặc trang không nhận ảnh.
 - Mặc định ẩn toàn bộ cửa sổ Zalo Native, kể cả ảnh xem trước cũ, trước khi đọc màn hình.
+
+### Cập nhật 0.2.6
+
+Sửa lỗi `clipboard.writeImage is not a function` bằng API clipboard bất đồng bộ của Electron 45. Cả sao chép ảnh và đính kèm đều ghi PNG bằng `ClipboardItem`, chờ ghi xong rồi mới dán bằng thao tác native. Chạy `npm run test:clipboard` để kiểm tra PNG thực sự đi qua clipboard tới ô soạn, giữ bản nháp và không gửi tin.
