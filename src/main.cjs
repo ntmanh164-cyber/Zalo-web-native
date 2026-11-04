@@ -2,6 +2,7 @@ const { app, BrowserWindow, WebContentsView, ipcMain, Menu, shell, dialog, deskt
 const path = require('node:path');
 const fs = require('node:fs');
 const { trusted, external, cropRect, permissionAllowed, browserUserAgent } = require('./policy.cjs');
+const { pasteImageScript } = require('./attachments.cjs');
 const { installPopups } = require('./popups.cjs');
 const { navigationScript } = require('./navigation.cjs');
 const { attachDiagnostics } = require('./diagnostics.cjs');
@@ -62,8 +63,11 @@ async function capture() {
     if (process.platform === 'darwin' && systemPreferences.getMediaAccessStatus('screen') === 'denied') {
       throw new Error('Hãy bật quyền Ghi màn hình cho Zalo Native trong Cài đặt hệ thống → Quyền riêng tư & Bảo mật, rồi mở lại ứng dụng.');
     }
-    win.hide();
-    await new Promise(resolve => setTimeout(resolve, 350));
+    // Hide every Zalo window, including a previous screenshot preview. Wait for
+    // the compositor to present the desktop before asking for its thumbnail.
+    for(const window of BrowserWindow.getAllWindows())if(!window.isDestroyed() && window.isVisible())window.hide();
+    await new Promise(resolve => setTimeout(resolve, 750));
+    if(win.isVisible() || (preview && !preview.isDestroyed() && preview.isVisible()))throw new Error('Không thể ẩn cửa sổ Zalo trước khi chụp. Hãy thử lại.');
     const displays = screen.getAllDisplays();
     const sources = await desktopCapturer.getSources({types:['screen'],thumbnailSize:{
       width:Math.max(...displays.map(d => Math.ceil(d.size.width*d.scaleFactor))),
@@ -72,7 +76,7 @@ async function capture() {
     for (const display of displays) {
       const source = sources.find(s => s.display_id === String(display.id)) || (displays.length === 1 ? sources[0] : null);
       if (!source || source.thumbnail.isEmpty()) continue;
-      const overlay = new BrowserWindow({...display.bounds,frame:false,transparent:false,resizable:false,movable:false,alwaysOnTop:true,skipTaskbar:true,enableLargerThanScreen:true,webPreferences:secure});
+      const overlay = new BrowserWindow({...display.bounds,show:false,frame:false,transparent:false,resizable:false,movable:false,alwaysOnTop:true,skipTaskbar:true,enableLargerThanScreen:true,webPreferences:secure});
       overlays.set(overlay.webContents.id,{window:overlay,image:source.thumbnail,bounds:display.bounds});
       const overlayId = overlay.webContents.id;
       overlay.on('closed', () => { if (overlays.has(overlayId)) closeCapture(); });
@@ -184,12 +188,14 @@ ipcMain.handle('desktop',async (event,action,payload) => {
       if (!result.canceled && result.filePath) { await fs.promises.writeFile(result.filePath,capturedImage.toPNG()); return true; } return false;
     }
     if (action === 'preview:paste') {
-      clipboard.writeImage(capturedImage); preview.close(); win.show(); win.focus();
-      // Focus only a visible editor; never hit Enter or send a message.
-      const found = await zalo.webContents.executeJavaScript(`(() => { const el = [...document.querySelectorAll('#richInput, #chat-input-content, [data-testid="chat-input"], [contenteditable="true"][role="textbox"]')].find(e => e.getClientRects().length && !e.closest('[role="dialog"]')); if (!el) return false; el.focus(); return true; })()`);
-      if (found) { zalo.webContents.focus(); zalo.webContents.paste(); }
-      else dialog.showMessageBox(win,{type:'info',message:'Ảnh đã được sao chép',detail:'Mở cuộc trò chuyện, bấm ô soạn tin rồi nhấn Cmd+V (Mac) hoặc Ctrl+V (Windows) để đính kèm ảnh.'});
-      return;
+      if(!zalo || !trusted(zalo.webContents.getURL()))throw new Error('Hãy mở cuộc trò chuyện trước khi đính kèm ảnh.');
+      showSettings(false);win.show();win.focus();zalo.webContents.focus();
+      const result=await zalo.webContents.executeJavaScript(pasteImageScript(capturedImage.toPNG().toString('base64'),`Zalo-Screenshot-${Date.now()}.png`),true);
+      if(!result.ok) {
+        clipboard.writeImage(capturedImage);preview.show();preview.focus();
+        throw new Error(result.reason==='editor'?'Hãy mở một cuộc trò chuyện rồi thử đính kèm lại. Ảnh vẫn còn trong cửa sổ xem trước.':'Zalo chưa nhận ảnh. Ảnh đã được sao chép; hãy thử Cmd+V (Mac) hoặc Ctrl+V (Windows), hoặc lưu PNG để đính kèm.');
+      }
+      preview.close();return true;
     }
     throw new Error('Unknown preview action');
   }

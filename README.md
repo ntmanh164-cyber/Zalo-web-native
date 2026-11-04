@@ -31,7 +31,7 @@ npm start
 - macOS dùng `hiddenInset` với traffic lights thật ở góc thanh bên. Windows dùng nút cửa sổ hệ thống.
 - Bố cục Telegram: không có thanh điều hướng dọc. Menu **Tin nhắn · Danh bạ · Đã lưu · Chụp ảnh · Cài đặt** nằm dưới danh sách chat. Đã lưu mở My Documents thật của Zalo. Tiêu đề và nút tài khoản nằm trong cột trái; khung chat bên phải sử dụng trọn chiều cao cửa sổ.
 - Font hệ thống San Francisco / Segoe UI, thanh cuộn mảnh xuất hiện khi rê chuột hoặc cuộn.
-- Cột chat 316 px, hoặc 292 px khi cửa sổ nhỏ; có thể tăng lên 356 px bằng cách tắt Bố cục gọn. Nền đọc xanh nhạt, bong bóng tin đến trắng và tin đi xanh. Ô soạn tin một hàng với nút kẹp giấy để mở khay công cụ Zalo gốc. Khi bật ẩn banner, màn hình chào quảng bá được thay bằng lời nhắc chọn cuộc trò chuyện.
+- Cột chat 316 px, hoặc 292 px khi cửa sổ nhỏ; có thể tăng lên 356 px bằng cách tắt Bố cục gọn. Nền đọc xanh nhạt, bong bóng tin đến trắng và tin đi xanh. Hàng công cụ Zalo gốc luôn hiển thị phía trên ô soạn, gồm các chức năng mà Zalo Web cung cấp như đính kèm, định dạng và đánh dấu quan trọng. Khi bật ẩn banner, màn hình chào quảng bá được thay bằng lời nhắc chọn cuộc trò chuyện.
 - Bộ lọc banner tải Zalo PC, sticker, zStyle, theo selector và văn bản trong vùng quảng bá. Theo dõi thay đổi DOM. Không lọc theo văn bản toàn trang hay xoá dialog chung.
 - Chụp vùng màn hình: **Cmd+Shift+5** trên Mac, **Ctrl+Shift+5** trên Windows, hoặc nút chụp ở thanh bên. Kéo chọn vùng, Esc để huỷ. Hỗ trợ nhiều màn hình và ảnh Retina.
 - Xem lại ảnh; lưu PNG, sao chép, hoặc dán vào ô chat. Không tự gửi. Nếu không tìm thấy ô soạn tin, ảnh nằm trên clipboard để bạn tự dán.
@@ -77,3 +77,9 @@ Các liên kết bộ cài phía trên hiện là bản phát hành 0.2.1.
 ### Cập nhật 0.2.4
 
 Sửa cảnh báo không mở được popup khi Zalo gọi `window.open()` hoặc mở cửa sổ trống rồi gán liên kết sau đó. Liên kết vẫn được chuyển sang trình duyệt mặc định. Kiểm thử riêng luồng này bằng `npm run test:popups`.
+
+### Cập nhật 0.2.5
+
+- Hiển thị lại hàng công cụ soạn tin gốc, giữ nguyên xử lý của Zalo Web.
+- Đính kèm ảnh chụp bằng tệp PNG có tên và loại tệp rõ ràng; giữ ảnh xem trước nếu không tìm thấy ô soạn hoặc trang không nhận ảnh.
+- Mặc định ẩn toàn bộ cửa sổ Zalo Native, kể cả ảnh xem trước cũ, trước khi đọc màn hình.

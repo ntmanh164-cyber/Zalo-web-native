@@ -46,7 +46,7 @@ Bộ cài Windows hiện chưa ký số, nên Windows hoặc trình duyệt có 
 - **Đã lưu:** mở cuộc trò chuyện **My Documents**.
 - **Chụp ảnh:** kéo chọn một vùng màn hình; **Esc** để huỷ. Xem lại ảnh rồi chọn lưu PNG, sao chép hoặc đính kèm vào Zalo. Ứng dụng không tự gửi ảnh.
 - **Phím chụp:** **Cmd+Shift+5** trên Mac, **Ctrl+Shift+5** trên Windows; chỉ hoạt động khi ứng dụng đang được sử dụng.
-- **Kẹp giấy:** mở hoặc đóng khay công cụ ảnh, tệp, sticker và các công cụ Zalo gốc.
+- **Hàng công cụ soạn tin (từ 0.2.5):** hiển thị phía trên ô nhập, dùng các chức năng gốc của Zalo Web. Khi chụp, cửa sổ Zalo Native và ảnh xem trước cũ được ẩn. Bấm **Đính kèm vào Zalo** để đưa PNG vào cuộc trò chuyện; kiểm tra ảnh rồi tự bấm Gửi.
 - **Cài đặt:** điều chỉnh bố cục gọn, ẩn banner, hoặc mở các tuỳ chọn Zalo gốc.
 
 ## Kiểm tra tệp tải về

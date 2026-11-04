@@ -30,21 +30,15 @@ html.zn-windows #chatViewContainer > #header { padding-right: 144px !important; 
 #richInput { font-family: var(--zn-font) !important; -webkit-font-smoothing: antialiased; }
 #chat-box-input-container-id.zn-composer { position: relative !important; padding: 12px 20px 16px !important; background: var(--zn-chat) !important; border: 0 !important; box-sizing: border-box !important; }
 .zn-composer .zn-tools-host { display: contents !important; }
-.zn-composer .chat-box-toolbar { display: none !important; position: absolute !important; bottom: calc(100% - 4px) !important; left: 20px !important; right: 20px !important; width: fit-content !important; max-width: calc(100% - 40px) !important; height: auto !important; min-height: 48px; padding: 8px !important; margin: 0 !important; border: 1px solid var(--zn-line) !important; border-radius: 12px !important; background: var(--zn-panel) !important; box-shadow: 0 4px 24px #29476118; z-index: 100; }
-.zn-composer.zn-tools-open .chat-box-toolbar { display: flex !important; flex-wrap: wrap; gap: 6px; }
+.zn-composer .chat-box-toolbar { display: flex !important; position: relative !important; inset: auto !important; flex-wrap: wrap !important; width: 100% !important; max-width: 100% !important; height: auto !important; min-height: 40px; padding: 4px 8px !important; margin: 0 0 6px !important; gap: 6px; border: 0 !important; border-bottom: 1px solid var(--zn-line) !important; border-radius: 10px !important; background: var(--zn-panel) !important; box-shadow: none; z-index: 5; box-sizing: border-box !important; }
 .zn-composer .chat-box-toolbar-item { margin: 0 !important; }
 .zn-composer #chatInput { position: relative !important; border: 1px solid var(--zn-line) !important; border-radius: 14px !important; box-shadow: 0 2px 10px #29476108; }
-.zn-composer #chat-input-container-id { padding-left: 40px !important; }
+.zn-composer #chat-input-container-id { padding-left: 12px !important; }
 .zn-list-top { position: absolute; right: 16px; bottom: 80px; z-index: 20; width: 40px; height: 40px; padding: 0; display: grid; place-items: center; border: 1px solid var(--zn-line); border-radius: 50%; color: var(--zn-ink); background: var(--zn-panel); box-shadow: 0 3px 16px #29476120; cursor: pointer; }
 .zn-list-top[hidden] { display: none !important; }
 .zn-list-top:hover { color: var(--zn-blue); background: var(--zn-field); }
 .zn-list-top:focus-visible { outline: 2px solid var(--zn-blue); }
 .zn-list-top svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.zn-attachments { position: absolute; left: 7px; bottom: 9px; display: grid; place-items: center; width: 32px; height: 32px; background: transparent; color: #8198ae; border: 0; border-radius: 8px; cursor: pointer; z-index: 2; }
-.zn-attachments:hover, .zn-attachments[aria-expanded=true] { color: var(--zn-blue); background: var(--zn-field); }
-.zn-attachments:focus-visible { outline: 2px solid var(--zn-blue); }
-.zn-attachments svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-
 @media (prefers-color-scheme: dark) {
  :root { --zn-surface: #17212c; --zn-panel: #17212c; --zn-field: #243240; --zn-line: #273544; --zn-chat: #101c26; --zn-incoming: #223342; --zn-outgoing: #275272; --zn-ink: #e5edf6; }
  #conversationList .conv-item.selected { background: #263d52 !important; }
@@ -90,18 +84,13 @@ function installFilter() {
     updateListTop();
     const container = document.getElementById('chat-box-input-container-id');
     const input = container?.querySelector('#chatInput');
-    if (input && container.querySelector('.chat-box-toolbar') && !input.querySelector('.zn-attachments')) {
+    if(input && container.querySelector('.chat-box-toolbar')) {
       const toolbar=container.querySelector('.chat-box-toolbar');
       let toolsHost=toolbar;
       while(toolsHost.parentElement && toolsHost.parentElement!==container && !toolsHost.parentElement.contains(input))toolsHost=toolsHost.parentElement;
       if(toolsHost!==toolbar)toolsHost.classList.add('zn-tools-host');
-      const toggle=document.createElement('button');
-      toggle.type='button';toggle.className='zn-attachments';
-      toggle.setAttribute('aria-label','Đính kèm và công cụ');toggle.setAttribute('aria-expanded','false');
-      toggle.title='Đính kèm và công cụ';
-      toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m21 11-8.5 8.5a6 6 0 0 1-8.5-8.5L13 2a4 4 0 0 1 5.7 5.7L9.5 17a2 2 0 0 1-2.8-2.8L15 6"/></svg>';
-      toggle.addEventListener('click',()=>{const open=container.classList.toggle('zn-tools-open');toggle.setAttribute('aria-expanded',String(open));});
-      input.append(toggle);container.classList.add('zn-composer');
+      input.querySelector('.zn-attachments')?.remove();
+      container.classList.add('zn-composer');
     }
 
     // Observed on the current Zalo login page: this promo has no class/id.
@@ -118,7 +107,6 @@ function installFilter() {
   }
   const observer = new MutationObserver(() => { clearTimeout(timer); timer = setTimeout(scan, 120); });
   observer.observe(document.documentElement, {childList: true, subtree: true, characterData: true});
-  document.addEventListener('keydown',event=>{if(event.key==='Escape'){document.querySelectorAll('.zn-tools-open').forEach(el=>{el.classList.remove('zn-tools-open');el.querySelector('.zn-attachments')?.setAttribute('aria-expanded','false');});}});
   window.addEventListener('resize',updateListTop);
   document.addEventListener('scroll', () => {
     updateListTop();
