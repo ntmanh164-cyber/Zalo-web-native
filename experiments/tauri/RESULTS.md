@@ -11,7 +11,8 @@ Ngày 2026-11-07. Máy macOS 15.6 / Apple Silicon. Tauri 2.12.5; Wry 0.57.1; Rus
 | Chọn ảnh / tệp tại trang kiểm thử nội bộ | Qua: PNG 12.841 byte được đọc và xem trước |
 | Dán PNG tại trang nội bộ | Qua: sao chép bằng Clipboard API rồi Cmd+V nhận image/png 451 byte |
 | Tải PNG kiểm thử | Qua: Downloads/zalo-rust-lab-test.png, 240 × 120 RGBA |
-| Gửi ảnh / tệp qua máy chủ Zalo | Chưa kiểm tra |
+| Đính kèm PNG vào ô soạn Zalo / My Documents | Qua: người dùng xác nhận ảnh hiện trong ô soạn |
+| Bấm Gửi và kiểm tra máy chủ Zalo nhận ảnh / tệp | Chưa kiểm tra |
 | Khôi phục đăng nhập sau khi mở lại | Qua: đóng bản debug, mở bản release trong Applications, danh sách chat xuất hiện mà không quét lại |
 | Windows build / chạy trên Windows thật | Rust test và bộ cài NSIS x64 build thành công trên runner Windows; chưa thử UI Windows thật |
 
