@@ -87,3 +87,7 @@ Sửa cảnh báo không mở được popup khi Zalo gọi `window.open()` ho�
 ### Cập nhật 0.2.6
 
 Sửa lỗi `clipboard.writeImage is not a function` bằng API clipboard bất đồng bộ của Electron 45. Cả sao chép ảnh và đính kèm đều ghi PNG bằng `ClipboardItem`, chờ ghi xong rồi mới dán bằng thao tác native. Chạy `npm run test:clipboard` để kiểm tra PNG thực sự đi qua clipboard tới ô soạn, giữ bản nháp và không gửi tin.
+
+### Thử nghiệm Rust + Tauri
+
+Bản riêng tại [experiments/tauri](experiments/tauri/README.md), chưa thay thế Electron. Đã thử đăng nhập QR và giữ phiên sau khi mở lại trên macOS; xem [kết quả cụ thể](experiments/tauri/RESULTS.md). Quy trình Windows/macOS chạy thủ công bằng workflow **Rust Lab installers**.
