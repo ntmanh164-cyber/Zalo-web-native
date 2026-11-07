@@ -11,3 +11,8 @@ test-results/
 *.jsonl
 layout-geometry.json
 preferences.json
+
+# Rust prototype build artifacts
+experiments/tauri/src-tauri/target/
+experiments/tauri/src-tauri/gen/
+experiments/tauri/Rust-Lab-*.zip
