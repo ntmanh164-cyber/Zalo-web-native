@@ -4,6 +4,7 @@ for(const name of ['header.html','footer.html','chrome.css','chrome.js','capture
  if(name.endsWith('.html'))content=content.replace("default-src 'self';","default-src 'self'; connect-src ipc: http://ipc.localhost;").replace('<script src=', '<script src="bridge.js"></script><script src=');
  if(name==='header.html')content=content.replace('<header class="chrome-header">','<header class="chrome-header" data-tauri-drag-region>').replace('>Zalo</span>','>Tin nhắn</span>');
  if(name==='chrome.css')content+='\n.chrome-header{height:56px;padding:0 18px;border-bottom:1px solid var(--line);background:var(--surface)}.chrome-title{margin:0 auto 0 0;font-size:18px;font-weight:700;letter-spacing:-.5px}.chrome-header .chrome-action{display:none}.chrome-header .connection{margin:0}\n';
+ if(name==='chrome.js')content+="\nwindow.desktop.onState(data=>{if(data.navigation){const title=document.querySelector('.chrome-title');if(title)title.textContent=data.navigation==='contacts'?'Danh bạ':'Tin nhắn';}});\n";
  fs.writeFileSync(path.join(ui,name),content);
 }
 const {style,filterScript}=require(path.join(root,'src/zalo-style.cjs'));

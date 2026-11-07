@@ -1,7 +1,7 @@
 /* Independent visual adaptation of a macOS three-column messaging layout. */
 :root{--rust-rail:220px;--zn-surface:#fafafc;--zn-panel:#fff;--zn-field:#f0f1f5;--zn-line:#e6e8ed;--zn-chat:#fbfbfd;--zn-blue:#0a84ff;--zn-incoming:#e9e9eb;--zn-outgoing:#0a84ff;--zn-ink:#252a32}
 @media(max-width:1100px){:root{--rust-rail:188px}}
-#sidebarNav{margin-left:var(--rust-rail)!important;padding-top:56px!important;padding-bottom:0!important;background:var(--zn-surface)!important;border-color:var(--zn-line)!important}
+#sidebarNav{margin-left:0!important;padding-top:56px!important;padding-bottom:0!important;background:var(--zn-surface)!important;border-color:var(--zn-line)!important}
 #main-tab{top:56px!important;bottom:0!important}
 #contact-search{padding-top:2px!important}
 #contact-search .group-search,#contact-search-input{border-radius:9px!important;background:var(--zn-field)!important;border:1px solid #e8eaf0!important}
@@ -24,3 +24,5 @@
 #chatOnboard{background:var(--zn-chat)!important}#chatOnboard::before{font-size:28px!important;font-weight:650!important;color:#9ca6b5!important}#chatOnboard::after{font-size:13px!important}
 @media(prefers-color-scheme:dark){:root{--zn-surface:#272a32;--zn-panel:#2d3039;--zn-field:#333741;--zn-line:#3a3f49;--zn-chat:#20232a;--zn-incoming:#3b3e47;--zn-outgoing:#087cf0;--zn-ink:#e7ebf2}#contact-search .group-search,#contact-search-input{border-color:#3c424e!important}#conversationList .conv-item.selected{background:#304763!important}#conversationList .conv-item:not(.selected):hover{background:#30353f!important}#chatViewContainer>#header{background:#292d35e0!important;border-color:#3a3f49!important}.zn-composer #chatInput{border-color:#424957!important}}
 #chatViewContainer{min-width:0!important;flex:1 1 0!important}
+
+html.rust-cloud #sidebarNav{padding-top:0!important}

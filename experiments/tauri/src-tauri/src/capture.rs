@@ -191,12 +191,15 @@ pub fn image(app: &AppHandle) -> Result<RgbaImage, String> {
 }
 pub fn copy(app: &AppHandle) -> Result<(), String> {
     let image = image(app)?;
+    write_image(&image)
+}
+pub fn write_image(image: &RgbaImage) -> Result<(), String> {
     let mut clipboard = arboard::Clipboard::new().map_err(|e| e.to_string())?;
     clipboard
         .set_image(arboard::ImageData {
             width: image.width() as usize,
             height: image.height() as usize,
-            bytes: Cow::Owned(image.into_raw()),
+            bytes: Cow::Borrowed(image.as_raw()),
         })
         .map_err(|e| e.to_string())
 }

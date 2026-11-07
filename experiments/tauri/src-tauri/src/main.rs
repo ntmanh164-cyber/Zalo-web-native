@@ -79,6 +79,7 @@ fn main() {
                 .text("zalo", "Mở Zalo")
                 .text("reload", "Tải lại Zalo")
                 .text("lab", "Kiểm tra ảnh / tệp")
+                .text("lab-paste", "Dán PNG mẫu vào ô kiểm tra")
                 .separator()
                 .item(&capture_item)
                 .text("open-png", "Mở ảnh PNG…")
@@ -115,6 +116,17 @@ fn main() {
                         .title("Kiểm tra Rust Lab")
                         .inner_size(850., 780.)
                         .build();
+                    }
+                }
+                "lab-paste" => {
+                    if let Some(view) = app.get_webview("lab") {
+                        let image =
+                            image::RgbaImage::from_pixel(120, 80, image::Rgba([36, 141, 204, 255]));
+                        if capture::write_image(&image).is_ok() {
+                            let _ = view.window().set_focus();
+                            let _ = view.set_focus();
+                            let _ = capture::native_paste(&view);
+                        }
                     }
                 }
                 "capture" => {

@@ -81,14 +81,23 @@ pub fn layout(app: &AppHandle) {
     let size: LogicalSize<f64> = size.to_logical(scale);
     let runtime = app.state::<Runtime>();
     let inner = runtime.0.lock().unwrap();
-    let width = if size.width < 1000. {
+    let rail = if size.width < 1100. { 188. } else { 220. };
+    let origin = if inner.ready { rail } else { 0. };
+    let available = size.width - origin;
+    let width = if available < 1000. {
         292.
     } else if inner.prefs.compact {
         316.
     } else {
         356.
     };
-    let rail = if size.width < 1100. { 188. } else { 220. };
+    if let Some(remote) = app.get_webview("zalo") {
+        let _ = remote.set_auto_resize(false);
+        let _ = remote.set_bounds(Rect {
+            position: LogicalPosition::new(origin, 0.).into(),
+            size: LogicalSize::new(available, size.height).into(),
+        });
+    }
     for (label, x, y, width, height) in [
         ("navigation", 0., 0., rail, size.height),
         ("chrome-header", rail, 0., width, 56.),
@@ -98,7 +107,10 @@ pub fn layout(app: &AppHandle) {
                 position: LogicalPosition::new(x, y).into(),
                 size: LogicalSize::new(width, height).into(),
             });
-            if inner.ready && !inner.settings {
+            if inner.ready
+                && !inner.settings
+                && (label != "chrome-header" || inner.navigation != "cloud")
+            {
                 let _ = view.show();
             } else {
                 let _ = view.hide();
@@ -145,14 +157,23 @@ pub fn notify(app: &AppHandle, force: bool) -> Result<(), String> {
         }
         inner.last_notification = Some(Instant::now());
     }
+    if force {
+        let app = app.clone();
+        std::thread::spawn(move || {
+            std::thread::sleep(std::time::Duration::from_secs(3));
+            let _ = app
+                .notification()
+                .builder()
+                .title("Zalo Native Rust")
+                .body("Thông báo tin nhắn đã sẵn sàng.")
+                .show();
+        });
+        return Ok(());
+    }
     app.notification()
         .builder()
         .title("Zalo Native Rust")
-        .body(if force {
-            "Thông báo tin nhắn đã sẵn sàng."
-        } else {
-            "Bạn có tin nhắn mới trên Zalo."
-        })
+        .body("Bạn có tin nhắn mới trên Zalo.")
         .show()
         .map_err(|e| e.to_string())
 }
@@ -197,7 +218,7 @@ pub async fn observe(app: AppHandle, webview: Webview, payload: Value) -> Result
         inner.ready = payload["ready"].as_bool().unwrap_or(false);
         inner.unread = payload["unread"].as_bool().unwrap_or(false);
         let nav = payload["navigation"].as_str().unwrap_or("chat");
-        inner.navigation = if ["chat", "contacts", "saved"].contains(&nav) {
+        inner.navigation = if ["chat", "contacts", "saved", "cloud"].contains(&nav) {
             nav.into()
         } else {
             "chat".into()

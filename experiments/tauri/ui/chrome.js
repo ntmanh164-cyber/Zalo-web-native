@@ -8,3 +8,5 @@ window.desktop.onState(data=>{
  if(data.navigation)for(const button of document.querySelectorAll('[data-nav]'))button.setAttribute('aria-selected',button.dataset.nav===data.navigation);
  if('unread' in data)document.querySelector('[data-nav="chat"]')?.classList.toggle('has-unread',data.unread);
 });
+
+window.desktop.onState(data=>{if(data.navigation){const title=document.querySelector('.chrome-title');if(title)title.textContent=data.navigation==='contacts'?'Danh bạ':'Tin nhắn';}});
