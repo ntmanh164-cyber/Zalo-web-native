@@ -1,0 +1,7 @@
+const invoke=payload=>window.__TAURI__?.core.invoke('observe',{payload}).catch(()=>{});
+let last='',scheduled;
+function report(){const nav=document.querySelector('#main-tab');const title=document.querySelector('#header .threadChat__title')?.textContent.replace(/\s/g,'')||'';const status={kind:'status',ready:!!nav&&!!document.querySelector('#sidebarNav'),navigation:nav?.querySelector('.leftbar-tab.selected[title="Danh bạ"]')?'contacts':title.includes('MyDocuments')?'saved':'chat',unread:!!nav?.querySelector('.leftbar-unread-badge'),count:parseInt(nav?.querySelector('.leftbar-unread-badge')?.textContent)||0};const key=JSON.stringify(status);if(key!==last){last=key;invoke(status);}}
+new MutationObserver(()=>{clearTimeout(scheduled);scheduled=setTimeout(report,180);}).observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']});setInterval(report,1500);report();
+// Route the browser's own incoming-message notifications to Rust. No native
+// capture, clipboard or filesystem command is granted to this remote webview.
+try{class ZaloNotification extends EventTarget{static permission='granted';static async requestPermission(callback){callback?.('granted');return 'granted';}constructor(){super();invoke({kind:'notification'});}close(){}}Object.defineProperty(window,'Notification',{value:ZaloNotification,configurable:true});}catch{}

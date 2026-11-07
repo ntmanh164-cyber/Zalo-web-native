@@ -1,0 +1,18 @@
+{
+  "identifier": "local-ui",
+  "description": "Bundled desktop controls only",
+  "local": true,
+  "webviews": [
+    "chrome-header",
+    "chrome-footer",
+    "settings",
+    "preview",
+    "capture-*"
+  ],
+  "permissions": [
+    "allow-desktop",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:window:allow-start-dragging"
+  ]
+}

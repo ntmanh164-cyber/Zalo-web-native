@@ -1,0 +1,8 @@
+<!doctype html><html lang="vi"><head><meta charset="UTF-8"><meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src ipc: http://ipc.localhost; script-src 'self'; style-src 'self'"><title>Điều hướng Zalo Native</title><link rel="stylesheet" href="chrome.css"></head><body>
+<nav class="bottom-nav" aria-label="Menu dưới danh sách chat">
+<button class="nav-button" data-nav="chat" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l-2 2V11.5A8.5 8.5 0 0 1 10.5 3h2a8.5 8.5 0 0 1 8.5 8.5Z"/></svg><span>Tin nhắn</span><span class="badge"></span></button>
+<button class="nav-button" data-nav="contacts" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 3h14v18H6zM3 7h5M3 12h5M3 17h5"/><circle cx="13" cy="9" r="2"/><path d="M10 16c0-4 6-4 6 0"/></svg><span>Danh bạ</span></button>
+<button class="nav-button" data-nav="saved" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4Z"/></svg><span>Đã lưu</span></button>
+<button class="nav-button" data-nav="capture" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M8 3H3v5m13-5h5v5M3 16v5h5m13-5v5h-5M8 8h8v8H8z"/></svg><span>Chụp ảnh</span></button>
+<button class="nav-button" data-nav="settings" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg><span>Cài đặt</span></button>
+</nav><div class="status" role="status" hidden></div><script src="bridge.js"></script><script src="chrome.js"></script></body></html>

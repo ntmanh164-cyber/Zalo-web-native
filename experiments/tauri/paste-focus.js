@@ -1,0 +1,1 @@
+(()=>{const editor=[...document.querySelectorAll('#richInput,#chatInput [contenteditable="true"],[contenteditable="true"][role="textbox"]')].find(el=>el.isContentEditable&&el.getClientRects().length&&!el.closest('[role="dialog"]'));if(!editor)return false;editor.focus();return document.activeElement===editor;})();

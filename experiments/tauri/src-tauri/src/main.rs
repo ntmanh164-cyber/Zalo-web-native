@@ -1,7 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+mod capture;
+mod commands;
+mod runtime;
 use std::sync::atomic::{AtomicU64, Ordering};
 use tauri::{
-    menu::{MenuBuilder, SubmenuBuilder},
+    menu::{MenuBuilder, MenuItem, SubmenuBuilder},
     webview::{NewWindowResponse, PageLoadEvent},
     Manager, WebviewUrl, WebviewWindowBuilder,
 };
@@ -21,8 +24,32 @@ fn external(url: &Url) -> bool {
 }
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_notification::init())
+        .manage(runtime::Runtime::default())
+        .invoke_handler(tauri::generate_handler![
+            commands::desktop,
+            runtime::observe
+        ])
         .setup(|app| {
+            if let Ok(path) = app.path().app_data_dir() {
+                if let Ok(bytes) = std::fs::read(path.join("preferences.json")) {
+                    if let Ok(prefs) = serde_json::from_slice::<runtime::Prefs>(&bytes) {
+                        app.state::<runtime::Runtime>().0.lock().unwrap().prefs = prefs;
+                    }
+                }
+            }
             let handle = app.handle();
+            {
+                use tauri_plugin_notification::NotificationExt;
+                let click_handle = handle.clone();
+                app.notification().on_action(move |_| {
+                    if let Some(window) = click_handle.get_window("zalo") {
+                        let _ = window.show();
+                        let _ = window.set_focus();
+                    }
+                })?;
+            }
+
             let app_menu = SubmenuBuilder::new(handle, "Zalo Rust Lab")
                 .about(None)
                 .separator()
@@ -41,10 +68,21 @@ fn main() {
                 .paste()
                 .select_all()
                 .build()?;
+            let capture_item = MenuItem::with_id(
+                handle,
+                "capture",
+                "Chụp vùng màn hình",
+                true,
+                Some("CmdOrCtrl+Shift+5"),
+            )?;
             let trial = SubmenuBuilder::new(handle, "Thử nghiệm")
                 .text("zalo", "Mở Zalo")
                 .text("reload", "Tải lại Zalo")
                 .text("lab", "Kiểm tra ảnh / tệp")
+                .separator()
+                .item(&capture_item)
+                .text("settings", "Cài đặt")
+                .text("notification-test", "Thử thông báo")
                 .build()?;
             let menu = MenuBuilder::new(handle)
                 .items(&[&app_menu, &edit, &trial])
@@ -52,13 +90,13 @@ fn main() {
             app.set_menu(menu)?;
             app.on_menu_event(|app, event| match event.id().as_ref() {
                 "zalo" => {
-                    if let Some(window) = app.get_webview_window("zalo") {
+                    if let Some(window) = app.get_window("zalo") {
                         let _ = window.show();
                         let _ = window.set_focus();
                     }
                 }
                 "reload" => {
-                    if let Some(window) = app.get_webview_window("zalo") {
+                    if let Some(window) = app.get_webview("zalo") {
                         let _ = window.reload();
                     }
                 }
@@ -77,15 +115,33 @@ fn main() {
                         .build();
                     }
                 }
+                "capture" => {
+                    let handle = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if let Err(error) = capture::start(&handle).await {
+                            let _ = rfd::AsyncMessageDialog::new()
+                                .set_title("Chụp màn hình")
+                                .set_description(&error)
+                                .show()
+                                .await;
+                        }
+                    });
+                }
+                "settings" => {
+                    let _ = commands::settings(app);
+                }
+                "notification-test" => {
+                    let _ = runtime::notify(app, true);
+                }
                 _ => {}
             });
             let popup_app = handle.clone();
-            let main = WebviewWindowBuilder::new(
+            let builder = WebviewWindowBuilder::new(
                 handle,
                 "zalo",
                 WebviewUrl::External("https://chat.zalo.me/".parse()?),
             )
-            .title("Zalo Native Rust Lab · Thử nghiệm")
+            .title("Zalo Native Rust")
             .inner_size(1280., 820.)
             .min_inner_size(860., 600.)
             .disable_drag_drop_handler()
@@ -100,13 +156,16 @@ fn main() {
                     false
                 }
             })
-            .on_page_load(|_, payload| {
-                if let PageLoadEvent::Finished = payload.event() {
-                    eprintln!(
-                        "page-loaded {}{}",
-                        payload.url().host_str().unwrap_or("local"),
-                        payload.url().path()
-                    );
+            .on_page_load(|window, payload| {
+                let app = window.app_handle();
+                match payload.event() {
+                    PageLoadEvent::Started => {
+                        app.state::<runtime::Runtime>().0.lock().unwrap().ready = false;
+                        runtime::layout(app);
+                    }
+                    PageLoadEvent::Finished => {
+                        commands::apply_prefs(app);
+                    }
                 }
             })
             .on_new_window(move |url, features| {
@@ -140,8 +199,15 @@ fn main() {
                     Ok(window) => NewWindowResponse::Create { window },
                     Err(_) => NewWindowResponse::Deny,
                 }
-            })
-            .build()?;
+            });
+            #[cfg(target_os = "macos")]
+            let builder = builder
+                .title_bar_style(tauri::TitleBarStyle::Overlay)
+                .hidden_title(true)
+                .traffic_light_position(tauri::LogicalPosition::new(13., 17.));
+            let main = builder.build()?;
+            runtime::add_chrome(handle)?;
+            runtime::layout(handle);
             let _ = main.set_focus();
             Ok(())
         })

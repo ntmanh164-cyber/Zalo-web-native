@@ -1,0 +1,1 @@
+window.desktop={invoke:(action,payload)=>window.__TAURI__.core.invoke('desktop',{action,payload:payload??null}).catch(error=>{throw new Error(error?.message||String(error));}),onState:callback=>window.__TAURI__.event.listen('state',event=>callback(event.payload))};

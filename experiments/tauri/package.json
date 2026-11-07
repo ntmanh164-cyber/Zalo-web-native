@@ -1,12 +1,13 @@
 {
   "name": "zalo-native-rust-lab",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
-    "dev": "tauri dev",
-    "build": "tauri build",
-    "build:debug": "tauri build --debug",
-    "test": "cargo test --locked --manifest-path src-tauri/Cargo.toml"
+    "dev": "npm run export-ui && tauri dev",
+    "build": "npm run export-ui && tauri build",
+    "build:debug": "npm run export-ui && tauri build --debug",
+    "test": "cargo test --locked --manifest-path src-tauri/Cargo.toml",
+    "export-ui": "node scripts/export-ui.cjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "2.12.4"

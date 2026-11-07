@@ -23,3 +23,11 @@ Bản release macOS đã cài tại `/Applications/Zalo Native Rust Lab.app`, bu
 Lưu ý WebKit: nút sao chép PNG phải tạo `ClipboardItem` với Promise và gọi `clipboard.write` ngay trong sự kiện click; await tạo ảnh trước khi gọi sẽ mất user gesture. Đã sửa và kiểm tra lại thành công. Tham khảo [WebKit Clipboard API](https://webkit.org/blog/10855/async-clipboard-api/) và [WebKit bug 222262](https://bugs.webkit.org/show_bug.cgi?id=222262).
 
 GitHub Actions [run 42390976593](https://github.com/ntmanh164-cyber/Zalo-web-native/actions/runs/42390976593) đã thành công cả macOS và Windows (nguồn Rust tại commit `8c038f1`). Bản macOS cài tại máy còn có bản sửa JavaScript bảo toàn user gesture cho nút sao chép PNG của trang kiểm thử. Tệp Windows được tải về `release/rust-lab/windows/`; ZIP macOS mới nhất ở `release/rust-lab/`. Chưa phát hành thay thế Electron.
+
+## Chuyển tính năng sang Rust 0.2.0
+
+- Kiểm thử Rust: giới hạn URL, điều hướng allowlist, crop Retina/bounds và capability Zalo không có lệnh native nhạy cảm đều qua.
+- Bản macOS đã đóng gói và cài trong Applications: giao diện Telegram, menu dưới, cài đặt nội bộ hiển thị.
+- Đã kiểm tra thực tế việc ẩn cửa sổ Zalo trước chụp và mở ảnh vùng chọn ở cửa sổ xem trước.
+- Đã yêu cầu thông báo kiểm thử native; việc nhìn thấy popup và đính kèm ảnh mới đang chờ người dùng xác nhận.
+- Windows 0.2.0 cần build và kiểm thử giao diện trên máy thật; chưa coi kết quả 0.1.0 là kết quả của 0.2.0.

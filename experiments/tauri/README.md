@@ -1,6 +1,6 @@
 # Zalo Native Rust Lab
 
-Bản thử nghiệm Rust + Tauri 2, tách khỏi ứng dụng Electron. macOS dùng WKWebView; Windows dùng WebView2. Chưa thay thế bản Electron 0.2.6.
+Bản thử nghiệm Rust + Tauri 2, tách khỏi ứng dụng Electron. macOS dùng WKWebView; Windows dùng WebView2. Từ bản Rust 0.2.0 đã chuyển giao diện Telegram, chụp vùng màn hình và thông báo sang Rust. Bản Electron vẫn được giữ riêng.
 
 ## Chạy và đóng gói
 
@@ -16,15 +16,19 @@ npm run build -- --bundles nsis  # Windows
 
 Đầu ra trong `src-tauri/target/release/bundle/`. Nếu cargo chưa nằm trong PATH, mở terminal mới sau khi cài Rust. Trên máy đang thử nghiệm, Rust được cài bằng rustup với profile minimal; không thay đổi cấu hình shell tự động.
 
-## Phạm vi thử
+## Tính năng Rust 0.2.0
 
-- Cửa sổ native tải `https://chat.zalo.me/`, giữ giao diện gốc để kiểm tra tương thích WebKit trước khi chuyển giao diện Telegram.
-- Các chặng đăng nhập QR được cho phép theo đúng hostname/path đã quan sát ở bản Electron.
-- Liên kết mở bằng trình duyệt mặc định; hỗ trợ cửa sổ trống được gán URL sau đó.
-- Giữ trình chọn tệp và thao tác dán ảnh gốc của webview. Tắt trình xử lý drag/drop của Tauri để trang web nhận được drag/drop.
-- Menu **Thử nghiệm → Kiểm tra ảnh / tệp** mở trang nội bộ: chọn ảnh, dán PNG, tải PNG mẫu. Trang này không tải tệp lên máy chủ.
-- Không cấp capability hoặc command native nào cho Zalo từ xa. Phiên WebKit dùng ứng dụng/identifier riêng; không sao chép cookies từ Electron.
-- Chưa chuyển tính năng chụp vùng màn hình, thông báo native hay toàn bộ giao diện Telegram sang Rust.
+- Giao diện Telegram dùng lại CSS và bộ lọc đã có: menu dưới danh sách chat, font hệ thống, bong bóng bo góc, thanh cuộn mảnh, nút về đầu danh sách chat và hàng công cụ soạn tin gốc.
+- Header/footer là webview nội bộ riêng. macOS có traffic lights native lồng vào sidebar. Windows giữ khung cửa sổ native.
+- Chụp vùng bằng **Cmd+Shift+5 / Ctrl+Shift+5**, menu hoặc nút **Chụp ảnh**. Rust ẩn toàn bộ cửa sổ ứng dụng, đợi compositor ổn định, rồi chụp từng màn hình bằng Xcap. Hỗ trợ nhiều màn hình và tỉ lệ Retina.
+- Chọn vùng trên canvas, **Esc** để huỷ. Xem trước, lưu PNG bằng hộp thoại native, sao chép bằng clipboard Rust hoặc đính kèm vào ô soạn. Rust đợi ô soạn xác nhận sẵn sàng trước khi dán; không tự bấm Gửi.
+- Thông báo native qua plugin notification. Tín hiệu từ Notification của Zalo và thay đổi số tin chưa đọc được gom lại, chống lặp. Nội dung popup chung, không đưa nội dung tin nhắn vào log. Bấm popup để đưa Zalo ra trước.
+- Cài đặt: bố cục gọn, ẩn banner, bật/tắt thông báo và thử popup. Preferences lưu trong app data của Rust Lab.
+- Không sao chép cookies Electron. Giữ identifier `me.zalonative.rustlab` để dùng lại phiên Rust đã đăng nhập.
+- Capability của trang Zalo chỉ có `allow-observe` trên đúng `https://chat.zalo.me/*`; không có quyền chụp màn hình, đọc clipboard hoặc filesystem. Các thao tác native chỉ nhận từ các webview đóng gói nội bộ, đồng thời Rust kiểm tra lại nhãn và URL.
+- Trang thử ảnh/tệp nội bộ vẫn có trong menu **Thử nghiệm**.
+
+macOS cần bật quyền **Ghi màn hình** cho **Zalo Native Rust Lab**, sau đó mở lại ứng dụng. Quyền thông báo và chế độ Tập trung của macOS có thể ảnh hưởng việc hiển thị banner.
 
 ## Kiểm tra thực tế cần làm
 

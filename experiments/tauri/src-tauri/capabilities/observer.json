@@ -1,0 +1,1 @@
+{"identifier":"zalo-observer","description":"Zalo may only report readiness and new-message signals","local":false,"remote":{"urls":["https://chat.zalo.me/*"]},"webviews":["zalo"],"permissions":["allow-observe"]}
