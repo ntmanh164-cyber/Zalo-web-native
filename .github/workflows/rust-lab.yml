@@ -23,6 +23,13 @@ jobs:
           cache: npm
           cache-dependency-path: experiments/tauri/package-lock.json
       - run: rustup update stable --no-self-update
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            experiments/tauri/src-tauri/target
+          key: rust-lab-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('experiments/tauri/src-tauri/Cargo.lock') }}
       - run: npm ci
       - run: npm test
       - run: npm run build -- --bundles ${{ matrix.bundle }}

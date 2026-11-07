@@ -81,6 +81,8 @@ fn main() {
                 .text("lab", "Kiểm tra ảnh / tệp")
                 .separator()
                 .item(&capture_item)
+                .text("open-png", "Mở ảnh PNG…")
+                .text("demo-png", "Ảnh PNG kiểm thử")
                 .text("settings", "Cài đặt")
                 .text("notification-test", "Thử thông báo")
                 .build()?;
@@ -121,6 +123,23 @@ fn main() {
                         if let Err(error) = capture::start(&handle).await {
                             let _ = rfd::AsyncMessageDialog::new()
                                 .set_title("Chụp màn hình")
+                                .set_description(&error)
+                                .show()
+                                .await;
+                        }
+                    });
+                }
+                "demo-png" => {
+                    let image =
+                        image::RgbaImage::from_pixel(120, 80, image::Rgba([36, 141, 204, 255]));
+                    let _ = capture::preview(app, image);
+                }
+                "open-png" => {
+                    let handle = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if let Err(error) = capture::open_png(&handle).await {
+                            let _ = rfd::AsyncMessageDialog::new()
+                                .set_title("Mở ảnh PNG")
                                 .set_description(&error)
                                 .show()
                                 .await;

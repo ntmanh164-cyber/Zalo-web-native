@@ -162,6 +162,9 @@ pub fn crop(app: &AppHandle, label: &str, value: &Value) -> Result<(), String> {
         image::imageops::crop_imm(&frame.image, x, y, w, h).to_image()
     };
     restore(app);
+    preview(app, image)
+}
+pub fn preview(app: &AppHandle, image: RgbaImage) -> Result<(), String> {
     {
         let runtime = app.state::<Runtime>();
         runtime.0.lock().unwrap().captured = Some(image);
@@ -288,4 +291,26 @@ mod tests {
         )
         .is_err());
     }
+}
+
+pub async fn open_png(app: &AppHandle) -> Result<(), String> {
+    let Some(file) = rfd::AsyncFileDialog::new()
+        .add_filter("PNG", &["png"])
+        .pick_file()
+        .await
+    else {
+        return Ok(());
+    };
+    let path = file.path().to_path_buf();
+    let image = tauri::async_runtime::spawn_blocking(move || -> Result<RgbaImage, String> {
+        let reader = image::ImageReader::open(path).map_err(|e| e.to_string())?;
+        let image = reader.decode().map_err(|e| e.to_string())?;
+        if image.width() as u64 * image.height() as u64 > 50000000 {
+            return Err("Ảnh quá lớn để xem trước.".into());
+        }
+        Ok(image.into_rgba8())
+    })
+    .await
+    .map_err(|e| e.to_string())??;
+    preview(app, image)
 }

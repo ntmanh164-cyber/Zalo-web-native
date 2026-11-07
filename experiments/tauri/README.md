@@ -16,10 +16,10 @@ npm run build -- --bundles nsis  # Windows
 
 Đầu ra trong `src-tauri/target/release/bundle/`. Nếu cargo chưa nằm trong PATH, mở terminal mới sau khi cài Rust. Trên máy đang thử nghiệm, Rust được cài bằng rustup với profile minimal; không thay đổi cấu hình shell tự động.
 
-## Tính năng Rust 0.2.0
+## Tính năng Rust 0.3.0
 
-- Giao diện Telegram dùng lại CSS và bộ lọc đã có: menu dưới danh sách chat, font hệ thống, bong bóng bo góc, thanh cuộn mảnh, nút về đầu danh sách chat và hàng công cụ soạn tin gốc.
-- Header/footer là webview nội bộ riêng. macOS có traffic lights native lồng vào sidebar. Windows giữ khung cửa sổ native.
+- Bố cục ba cột lấy cảm hứng từ [Olaz / zalo-swift-re](https://github.com/qnguyen3/zalo-swift-re): sidebar điều hướng theo nhóm, danh sách chat ở giữa và nội dung bên phải. Màu trung tính, viền mảnh, tin đến xám, tin đi xanh và ô soạn bo tròn. Đây là HTML/CSS riêng của bản Rust, dùng dữ liệu và thao tác của Zalo Web.
+- Sidebar và header là webview nội bộ riêng. macOS có traffic lights native lồng vào sidebar. Windows giữ khung cửa sổ native.
 - Chụp vùng bằng **Cmd+Shift+5 / Ctrl+Shift+5**, menu hoặc nút **Chụp ảnh**. Rust ẩn toàn bộ cửa sổ ứng dụng, đợi compositor ổn định, rồi chụp từng màn hình bằng Xcap. Hỗ trợ nhiều màn hình và tỉ lệ Retina.
 - Chọn vùng trên canvas, **Esc** để huỷ. Xem trước, lưu PNG bằng hộp thoại native, sao chép bằng clipboard Rust hoặc đính kèm vào ô soạn. Rust đợi ô soạn xác nhận sẵn sàng trước khi dán; không tự bấm Gửi.
 - Thông báo native qua plugin notification. Tín hiệu từ Notification của Zalo và thay đổi số tin chưa đọc được gom lại, chống lặp. Nội dung popup chung, không đưa nội dung tin nhắn vào log. Bấm popup để đưa Zalo ra trước.
@@ -39,3 +39,5 @@ macOS cần bật quyền **Ghi màn hình** cho **Zalo Native Rust Lab**, sau �
 5. Thực hiện cùng các bước trên máy Windows thật trước khi kết luận thay thế Electron được.
 
 Việc chọn/dán ảnh thành công trên trang nội bộ không đồng nghĩa máy chủ Zalo đã chấp nhận ảnh. Kết quả được ghi trong `RESULTS.md` theo từng môi trường.
+
+Ảnh đang xem trước có thể lưu bằng **Lưu PNG**. Menu **Mở ảnh PNG…** mở lại ảnh đã lưu; **Ảnh PNG kiểm thử** tạo ảnh màu trơn không có dữ liệu riêng để thử clipboard/đính kèm. Nếu chưa mở cuộc trò chuyện, ứng dụng giữ ảnh xem trước và yêu cầu chọn cuộc trò chuyện trước khi dán.

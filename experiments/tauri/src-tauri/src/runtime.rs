@@ -66,7 +66,7 @@ pub fn state(app: &AppHandle) -> Value {
 }
 pub fn emit(app: &AppHandle) {
     let value = state(app);
-    for label in ["chrome-header", "chrome-footer", "settings"] {
+    for label in ["chrome-header", "navigation", "settings"] {
         if let Some(view) = app.get_webview(label) {
             let _ = view.emit("state", &value);
         }
@@ -88,13 +88,14 @@ pub fn layout(app: &AppHandle) {
     } else {
         356.
     };
-    for (label, y, height) in [
-        ("chrome-header", 0., 44.),
-        ("chrome-footer", (size.height - 64.).max(44.), 64.),
+    let rail = if size.width < 1100. { 188. } else { 220. };
+    for (label, x, y, width, height) in [
+        ("navigation", 0., 0., rail, size.height),
+        ("chrome-header", rail, 0., width, 56.),
     ] {
         if let Some(view) = app.get_webview(label) {
             let _ = view.set_bounds(Rect {
-                position: LogicalPosition::new(0., y).into(),
+                position: LogicalPosition::new(x, y).into(),
                 size: LogicalSize::new(width, height).into(),
             });
             if inner.ready && !inner.settings {
@@ -108,14 +109,14 @@ pub fn layout(app: &AppHandle) {
 pub fn add_chrome(app: &AppHandle) -> tauri::Result<()> {
     let main = app.get_window("zalo").unwrap();
     let window = main.clone();
-    for (label, file, y, height) in [
-        ("chrome-header", "header.html", 0., 44.),
-        ("chrome-footer", "footer.html", 756., 64.),
+    for (label, file, x, width, height) in [
+        ("navigation", "navigation.html", 0., 220., 820.),
+        ("chrome-header", "header.html", 220., 316., 56.),
     ] {
         let child = window.add_child(
             WebviewBuilder::new(label, WebviewUrl::App(file.into())),
-            LogicalPosition::new(0., y),
-            LogicalSize::new(316., height),
+            LogicalPosition::new(x, 0.),
+            LogicalSize::new(width, height),
         )?;
         child.hide()?;
     }
@@ -216,7 +217,7 @@ pub fn local(view: &Webview) -> bool {
     let label = view.label();
     (matches!(
         label,
-        "chrome-header" | "chrome-footer" | "settings" | "preview"
+        "chrome-header" | "navigation" | "settings" | "preview"
     ) || label.starts_with("capture-"))
         && view.url().is_ok_and(|u| {
             matches!(u.scheme(), "tauri" | "http" | "https")

@@ -31,3 +31,9 @@ GitHub Actions [run 42390976593](https://github.com/ntmanh164-cyber/Zalo-web-nat
 - Đã kiểm tra thực tế việc ẩn cửa sổ Zalo trước chụp và mở ảnh vùng chọn ở cửa sổ xem trước.
 - Đã yêu cầu thông báo kiểm thử native; việc nhìn thấy popup và đính kèm ảnh mới đang chờ người dùng xác nhận.
 - Windows 0.2.0 cần build và kiểm thử giao diện trên máy thật; chưa coi kết quả 0.1.0 là kết quả của 0.2.0.
+
+## Bố cục tham chiếu Olaz (0.3.0)
+
+Người dùng chọn cả bố cục ba cột: sidebar bên trái, danh sách ở giữa, khung chat bên phải. Mã Swift và các hình nền của Olaz không được đưa vào bản Rust; bản này vẫn tải Zalo Web và giữ các chức năng đã có.
+
+Sau kiểm thử 0.2.0, macOS được xác nhận đang tắt thông báo của Rust Lab và đã bật lại riêng cho ứng dụng. Ảnh chụp được giữ ở Downloads bằng hộp thoại lưu native. Đính kèm ảnh đang được kiểm tra lại sau khi mở đúng cuộc trò chuyện và bổ sung xử lý lỗi IPC dạng chuỗi.

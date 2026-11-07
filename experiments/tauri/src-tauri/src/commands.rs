@@ -34,6 +34,7 @@ pub fn selector(command: &str) -> Option<&'static str> {
         "chat" => Some("#main-tab [data-id=\"div_Main_TabMsg\"]"),
         "contacts" => Some("#main-tab .leftbar-tab[title=\"Danh bạ\"]"),
         "saved" => Some("#main-tab .leftbar-tab[title=\"My Documents\"]"),
+        "cloud" => Some("#main-tab [data-id=\"div_Main_Tab_zCloud\"]"),
         "account" => Some("#main-tab .nav__tabs__zalo .zavatar-container"),
         _ => None,
     }
@@ -142,10 +143,7 @@ pub async fn desktop(
             _ => Err("Unknown preview action".into()),
         };
     }
-    if !matches!(
-        label.as_str(),
-        "chrome-header" | "chrome-footer" | "settings"
-    ) {
+    if !matches!(label.as_str(), "chrome-header" | "navigation" | "settings") {
         return Err("Untrusted controls".into());
     }
     match action.as_str() {

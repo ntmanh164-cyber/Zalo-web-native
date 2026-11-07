@@ -4,7 +4,7 @@
   "local": true,
   "webviews": [
     "chrome-header",
-    "chrome-footer",
+    "navigation",
     "settings",
     "preview",
     "capture-*"
